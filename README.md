@@ -1,5 +1,12 @@
 Linux rapid diagnostic system status tool
 
+* Dashboard
+* Load condition
+* CPU load
+* Swap situation
+* Disk IO
+* Net IO
+
 ![](https://github.com/lflxp/lflxp-monitor/blob/master/asset/monitor.png)
 
 # Install
