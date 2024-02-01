@@ -1,0 +1,6 @@
+make: Entering directory `/opt/gopath/src/github.com/lflxp/lflxp-monitor'
+cp cmd/main.go .
+go install
+rm -f main.go
+make: Leaving directory `/opt/gopath/src/github.com/lflxp/lflxp-monitor'
+ 
