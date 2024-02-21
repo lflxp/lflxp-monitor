@@ -13,12 +13,20 @@ func init() {
 	before, err = cpu.Times(false)
 }
 
-func CpuPercent() (string, error) {
+type CpuUsage struct {
+	Usr float64
+	Sys float64
+	Idl float64
+	Iow float64
+}
+
+func CpuPercent() (string, error, CpuUsage) {
 	var rs string
+	result := CpuUsage{}
 	// after, err := NewMonitorCpu()
 	after, err := cpu.Times(false)
 	if err != nil {
-		return rs, err
+		return rs, err, result
 	}
 
 	// cpu_total1 := before.cpu_usr + before.cpu_nice + before.cpu_sys + before.cpu_idl + before.cpu_iow + before.cpu_irq + before.cpu_softirq
@@ -30,6 +38,10 @@ func CpuPercent() (string, error) {
 	sys := (after[0].System - before[0].System) * 100 / (cpu_total2 - cpu_total1)
 	idl := (after[0].Idle - before[0].Idle) * 100 / (cpu_total2 - cpu_total1)
 	iow := (after[0].Iowait - before[0].Iowait) * 100 / (cpu_total2 - cpu_total1)
+	result.Usr = usr
+	result.Sys = sys
+	result.Idl = idl
+	result.Iow = iow
 	// usr
 	if usr > 10.0 {
 		rs += Colorize(strings.Repeat(" ", 3-len(strconv.Itoa(int(usr))))+strconv.Itoa(int(usr))+" ", "red", "", false, true)
@@ -57,5 +69,5 @@ func CpuPercent() (string, error) {
 
 	rs += Colorize("|", "dgreen", "", false, false)
 	before = after
-	return rs, nil
+	return rs, nil, result
 }

@@ -26,6 +26,17 @@ type MonitorDisk struct {
 	WeightedIO       uint64 `json:"weightedIO"`
 }
 
+type IoUsage struct {
+	Readc  float64
+	Writec float64
+	Srkb   float64
+	Swkb   float64
+	Queue  int64
+	Await  float64
+	Svctm  float64
+	Util   float64
+}
+
 // get all disk
 func (this *MonitorDisk) Get() error {
 	data, err := disk.Partitions(true)
@@ -66,11 +77,12 @@ func NewDisk() (*MonitorDisk, error) {
 	return data, err
 }
 
-func DiskInfo() (string, error) {
+func DiskInfo() (string, error, IoUsage) {
 	var data_detail string
+	var result IoUsage
 	after, err := NewDisk()
 	if err != nil {
-		return data_detail, err
+		return data_detail, err, result
 	}
 
 	rs_disk := float64(after.ReadCount-beforeDisk.ReadCount) / 0.9999
@@ -96,6 +108,16 @@ func DiskInfo() (string, error) {
 	}
 
 	util_disk := float64(after.IoTime-beforeDisk.IoTime) / 10
+	result = IoUsage{
+		Readc:  rs_disk,
+		Writec: ws_disk,
+		Srkb:   rkbs_disk,
+		Swkb:   wkbs_disk,
+		Queue:  int64(after.IopsInProgress),
+		Await:  await_disk,
+		Svctm:  svctm_disk,
+		Util:   util_disk,
+	}
 	//usr
 	// fmt.Println(rs_disk, ws_disk, rkbs_disk, wkbs_disk, queue_disk, await_disk, svctm_disk, util_disk)
 	// fmt.Println(strings.Repeat(" ", 6-len(floatToString(rs_disk, 1))) + floatToString(rs_disk, 1))
@@ -173,5 +195,5 @@ func DiskInfo() (string, error) {
 
 	data_detail += Colorize("|", "dgreen", "", false, false)
 	beforeDisk = after
-	return data_detail, nil
+	return data_detail, nil, result
 }

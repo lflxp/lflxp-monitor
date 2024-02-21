@@ -16,6 +16,7 @@ func init() {
 	flag.Bool("s", false, "打印swap info")
 	flag.Bool("d", false, "打印Disk info")
 	flag.Bool("n", false, "打印net info")
+	flag.Bool("N", false, "打印net info")
 	flag.Bool("slave", false, "打印Slave info")
 	flag.String("u", "root", "mysql用户名")
 	flag.String("p", "system", "mysql密码")
@@ -44,5 +45,5 @@ func init() {
 }
 
 func main() {
-	pkg.Run("monitor -lazy -d -n")
+	pkg.Run("monitor -N")
 }

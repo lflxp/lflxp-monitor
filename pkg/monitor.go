@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+type Total struct {
+	Time time.Time
+	Cpu  CpuUsage
+	Disk IoUsage
+	Load MonitorLoad
+	Net  NetUsage
+	Swap SwapUsage
+}
+
 func Run(cmd string) {
 	t := time.NewTicker(time.Second)
 	defer t.Stop()
@@ -124,28 +133,28 @@ func FilterValue(in string) {
 	}
 
 	if strings.Contains(in, "-lazy") {
-		tmp_load, err := CpuLoad()
+		tmp_load, err, _ := CpuLoad()
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
 		value += tmp_load
 
-		tmp_cpu, err := CpuPercent()
+		tmp_cpu, err, _ := CpuPercent()
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
 		value += tmp_cpu
 
-		tmp_swap, err := SwapIO()
+		tmp_swap, err, _ := SwapIO()
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
 		value += tmp_swap
 
-		tmp_net, err := NetInfo(true)
+		tmp_net, err, _ := NetInfo(true)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
@@ -153,7 +162,7 @@ func FilterValue(in string) {
 		value += tmp_net
 	} else {
 		if strings.Contains(in, "-l") {
-			tmp_load, err := CpuLoad()
+			tmp_load, err, _ := CpuLoad()
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -162,7 +171,7 @@ func FilterValue(in string) {
 		}
 
 		if strings.Contains(in, "-c") {
-			tmp_cpu, err := CpuPercent()
+			tmp_cpu, err, _ := CpuPercent()
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -171,7 +180,7 @@ func FilterValue(in string) {
 		}
 
 		if strings.Contains(in, "-s") {
-			tmp_swap, err := SwapIO()
+			tmp_swap, err, _ := SwapIO()
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -180,7 +189,7 @@ func FilterValue(in string) {
 		}
 
 		if strings.Contains(in, "-n") {
-			tmp_net, err := NetInfo(true)
+			tmp_net, err, _ := NetInfo(true)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -189,7 +198,7 @@ func FilterValue(in string) {
 		}
 
 		if strings.Contains(in, "-N") {
-			tmp_net, err := NetInfo(false)
+			tmp_net, err, _ := NetInfo(false)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -199,7 +208,7 @@ func FilterValue(in string) {
 	}
 
 	if strings.Contains(in, "-d") {
-		tmp_disk, err := DiskInfo()
+		tmp_disk, err, _ := DiskInfo()
 		if err != nil {
 			fmt.Println(err.Error())
 			return
@@ -208,4 +217,84 @@ func FilterValue(in string) {
 	}
 
 	fmt.Println(value)
+}
+
+// 获取接口数据
+func FilterOut(in string) (*Total, error) {
+	result := &Total{Time: time.Now()}
+
+	if strings.Contains(in, "-lazy") {
+		_, err, load := CpuLoad()
+		if err != nil {
+			return result, err
+		}
+		result.Load = load
+
+		_, err, cpu := CpuPercent()
+		if err != nil {
+			return result, err
+		}
+		result.Cpu = cpu
+
+		_, err, swap := SwapIO()
+		if err != nil {
+			return result, err
+		}
+		result.Swap = swap
+
+		_, err, net := NetInfo(true)
+		if err != nil {
+			return result, err
+		}
+		result.Net = net
+	} else {
+		if strings.Contains(in, "-l") {
+			_, err, load := CpuLoad()
+			if err != nil {
+				return result, err
+			}
+			result.Load = load
+		}
+
+		if strings.Contains(in, "-c") {
+			_, err, cpu := CpuPercent()
+			if err != nil {
+				return result, err
+			}
+			result.Cpu = cpu
+		}
+
+		if strings.Contains(in, "-s") {
+			_, err, swap := SwapIO()
+			if err != nil {
+				return result, err
+			}
+			result.Swap = swap
+		}
+
+		if strings.Contains(in, "-n") {
+			_, err, net := NetInfo(true)
+			if err != nil {
+				return result, err
+			}
+			result.Net = net
+		}
+
+		if strings.Contains(in, "-N") {
+			_, err, net := NetInfo(false)
+			if err != nil {
+				return result, err
+			}
+			result.Net = net
+		}
+	}
+
+	if strings.Contains(in, "-d") {
+		_, err, disk := DiskInfo()
+		if err != nil {
+			return result, err
+		}
+		result.Disk = disk
+	}
+	return result, nil
 }

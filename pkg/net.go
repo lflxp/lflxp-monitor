@@ -73,6 +73,19 @@ type MonitorNet struct {
 	Fifoout     uint64 `json:"fifoout"`     // total number of FIFO buffers errors while sendin
 }
 
+type NetUsage struct {
+	BytesRecv   float64
+	BytesSent   float64
+	PackageRecv float64
+	PackageSend float64
+	ErrIn       float64
+	ErrOut      float64
+	DropIn      float64
+	DropOut     float64
+	FifoIn      float64
+	FifoOut     float64
+}
+
 func (this *MonitorNet) Get() error {
 	data, err := net1.IOCounters(false)
 	if err != nil {
@@ -117,11 +130,12 @@ func NewNet() (*MonitorNet, error) {
 	return data, err
 }
 
-func NetInfo(detail bool) (string, error) {
+func NetInfo(detail bool) (string, error, NetUsage) {
 	var rs string
+	var result NetUsage
 	after, err := NewNet()
 	if err != nil {
-		return rs, err
+		return rs, err, result
 	}
 
 	netIn := float64(after.BytesRecv-beforeNet.BytesRecv) / 0.99
@@ -149,9 +163,16 @@ func NetInfo(detail bool) (string, error) {
 		rs += Colorize(parseRepeatSpace(strconv.Itoa(int(netOut)/1024), 6)+"k", "yellow", "", false, false)
 	}
 
+	result = NetUsage{
+		BytesRecv: netIn,
+		BytesSent: netOut,
+	}
+
 	if detail == false {
 		packetsIn := float64(after.PacketsRecv - beforeNet.PacketsRecv)
 		packetsOut := float64(after.PacketsSent - beforeNet.PacketsSent)
+		result.PackageRecv = packetsIn
+		result.PackageSend = packetsOut
 
 		if packetsIn/1000/1000 >= 1.0 {
 			// rs += Colorize(strings.Repeat(" ", 6-len(floatToString(packetsIn/1000/1000, 1)))+floatToString(packetsIn/1000/1000, 1)+"m", "red", "", false, true)
@@ -177,6 +198,8 @@ func NetInfo(detail bool) (string, error) {
 
 		errIn := float64(after.Errin - beforeNet.Errin)
 		errOut := float64(after.Errout - beforeNet.Errout)
+		result.ErrIn = errIn
+		result.ErrOut = errOut
 
 		if errIn/1000/1000 >= 1.0 {
 			// rs += Colorize(strings.Repeat(" ", 6-len(floatToString(errIn/1000/1000, 1)))+floatToString(errIn/1000/1000, 1)+"m", "red", "", false, true)
@@ -202,6 +225,8 @@ func NetInfo(detail bool) (string, error) {
 
 		dropIn := float64(after.Dropin - beforeNet.Dropin)
 		dropOut := float64(after.Dropout - beforeNet.Dropout)
+		result.DropIn = dropIn
+		result.DropOut = dropOut
 
 		if dropIn/1000/1000 >= 1.0 {
 			// rs += Colorize(strings.Repeat(" ", 6-len(floatToString(dropIn/1000/1000, 1)))+floatToString(dropIn/1000/1000, 1)+"m", "red", "", false, true)
@@ -227,6 +252,8 @@ func NetInfo(detail bool) (string, error) {
 
 		ffIn := float64(after.Fifoin - beforeNet.Fifoin)
 		ffOut := float64(after.Fifoout - beforeNet.Fifoout)
+		result.FifoIn = ffIn
+		result.FifoOut = ffOut
 
 		if ffIn/1000/1000 >= 1.0 {
 			// rs += Colorize(strings.Repeat(" ", 6-len(floatToString(ffIn/1000/1000, 1)))+floatToString(ffIn/1000/1000, 1)+"m", "red", "", false, true)
@@ -253,5 +280,5 @@ func NetInfo(detail bool) (string, error) {
 
 	rs += Colorize("|", "dgreen", "", false, false)
 	beforeNet = after
-	return rs, err
+	return rs, err, result
 }
