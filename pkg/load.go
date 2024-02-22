@@ -13,6 +13,12 @@ type MonitorLoad struct {
 	load_15 float64
 }
 
+type LoadUsage struct {
+	Load1  float64
+	Load5  float64
+	Load15 float64
+}
+
 func (this *MonitorLoad) Get() (string, error) {
 	l, err := load.Avg()
 	if err != nil {
@@ -49,8 +55,13 @@ func NewLoad() *MonitorLoad {
 	return &MonitorLoad{}
 }
 
-func CpuLoad() (string, error, *MonitorLoad) {
+func CpuLoad() (string, error, LoadUsage) {
 	data := NewLoad()
 	rs, err := data.Get()
-	return rs, err, data
+	result := LoadUsage{
+		Load1:  data.load_1,
+		Load5:  data.load_5,
+		Load15: data.load_15,
+	}
+	return rs, err, result
 }
