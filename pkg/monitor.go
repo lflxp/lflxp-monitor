@@ -10,12 +10,13 @@ import (
 )
 
 type Total struct {
-	Time time.Time
-	Cpu  CpuUsage
-	Disk IoUsage
-	Load LoadUsage
-	Net  NetUsage
-	Swap SwapUsage
+	Time     time.Time
+	TimeUnix int64
+	Cpu      CpuUsage
+	Disk     IoUsage
+	Load     LoadUsage
+	Net      NetUsage
+	Swap     SwapUsage
 }
 
 func Run(cmd string) {
@@ -221,7 +222,7 @@ func FilterValue(in string) {
 
 // 获取接口数据
 func FilterOut(in string) (*Total, error) {
-	result := &Total{Time: time.Now()}
+	result := &Total{Time: time.Now(), TimeUnix: time.Now().UnixMilli()}
 
 	if strings.Contains(in, "-lazy") {
 		_, err, load := CpuLoad()
