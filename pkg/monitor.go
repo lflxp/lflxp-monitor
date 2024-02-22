@@ -13,7 +13,7 @@ type Total struct {
 	Time time.Time
 	Cpu  CpuUsage
 	Disk IoUsage
-	Load MonitorLoad
+	Load *MonitorLoad
 	Net  NetUsage
 	Swap SwapUsage
 }

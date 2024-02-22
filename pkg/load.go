@@ -49,8 +49,8 @@ func NewLoad() *MonitorLoad {
 	return &MonitorLoad{}
 }
 
-func CpuLoad() (string, error, MonitorLoad) {
+func CpuLoad() (string, error, *MonitorLoad) {
 	data := NewLoad()
 	rs, err := data.Get()
-	return rs, err, *data
+	return rs, err, data
 }
